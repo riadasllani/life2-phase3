@@ -1,4 +1,6 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,10 +10,12 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("GetUsers")]
@@ -23,7 +27,11 @@ namespace MatchingApp.Controllers
             // but the top 100 first users should contain the users who liked the current user
             // be sure for them not to be in queue (so shuffle them)
 
-            return Ok(); // return the users
+            List<User> = await _context.Users
+                .Where(u => u.Active == 1)
+                .ToList();
+
+            return List<User>;
         }
 
         [HttpPost("Match")]
