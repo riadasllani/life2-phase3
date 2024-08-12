@@ -2,7 +2,14 @@
 {
     public class Message
     {
-        // YOUR CODE HERE
-        // Message should have sender, reciever, content, date ...
+        public int MessageId { get; set; }
+
+        public String Sender { get; set; }
+
+        public String Reciever { get; set; }
+
+        public String Content { get; set; }
+
+        public DateTime Date { get; set; }
     }
 }

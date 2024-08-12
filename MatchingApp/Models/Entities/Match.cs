@@ -1,10 +1,23 @@
-﻿namespace MatchingApp.Models.Entities
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MatchingApp.Models.Entities
 {
     public class Match
     {
-        // YOUR CODE HERE
-        // in this table you should save the user who did the like and the user who was liked
-        // as well as some flag that indicates if this was mutual and the date ...
+
+        public int Id { get; set; }
+
+        [ForeignKey("LikeUserId")]
+        public int LikeUser { get; set; }
+
+        [ForeignKey("LikedUserId")]
+        public int LikedUser { get; set; }
+
+        public bool Mutual { get; set; }
+
+        public DateTime Date { get; set; }
+        
     }
 
 }

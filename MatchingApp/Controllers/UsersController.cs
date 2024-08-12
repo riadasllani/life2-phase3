@@ -1,5 +1,9 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Controllers
 {
@@ -8,11 +12,42 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly ApplicationDbContext _dbContext;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger,ApplicationDbContext dbContext)
         {
             _logger = logger;
+
+            _dbContext = dbContext;
         }
+
+
+
+        public async Task<IActionResult> HighestCreditUsers()
+        {
+            var users = await _dbContext.Users.OrderByDescending(u => u.Credits).Where(u => u.IsActive == true).FirstOrDefaultAsync();
+
+            return Ok(users);
+
+        }
+
+        public async Task<IActionResult> Youngest_Oldest()
+        {
+            var oldest = await _dbContext.Users.OrderByDescending(u => u.Age).Where(u => u.IsActive == true).Take(1).FirstOrDefaultAsync();
+            var youngest = await _dbContext.Users.OrderBy(u => u.Age).Where(u => u.IsActive == true).Take(1).FirstOrDefaultAsync();
+
+            List<User> users = new List<User>();
+
+            users.Add(oldest);
+            users.Add(youngest);
+
+            return Ok(users);
+
+           
+        }
+
+        
+
 
         // YOUR CODE HERE
         // Here you will have to create 4 endpoints based on these requirements

@@ -1,5 +1,7 @@
 ﻿using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
+using MatchingApp;
 
 namespace MatchingApp.Data.Seed
 {
@@ -25,14 +27,15 @@ namespace MatchingApp.Data.Seed
             {
             }
 
-            var dataExisting = _applicationDbContext.Users.Any();
-            if (!dataExisting)
+            var dataExisting = _applicationDbContext.Users.AnyAsync();
+            if (!dataExisting.Result)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
-
-                /*
-                 * Your code here ...
-                 */
+                var dataToBeSeed = ReadData("../User_Data.csv");
+                if (dataToBeSeed.Any())
+                {
+                    _applicationDbContext.Users.AddRange((IEnumerable<User>)dataToBeSeed);
+                    _applicationDbContext.SaveChanges();
+                }
             }
         }
 
@@ -40,12 +43,35 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            using (var reader = new StreamReader(path))
+            {
+                // Skip the header
+                reader.ReadLine();
+
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var value = line.Split(",");
+
+
+                    /*var record = new User
+                    {
+                        Id = value[0],
+                        Gender = value[1],
+                        Age = value[2],
+                        Credits = value[3],
+                        IsActive = value[4]
+                    };
+
+                    records.Add(record);*/
+                }
+            }
 
             return records;
         }
     }
 }
+
+
+
+
