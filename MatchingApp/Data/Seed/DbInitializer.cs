@@ -1,5 +1,8 @@
-﻿using MatchingApp.Models.Entities;
+﻿using CsvHelper.Configuration;
+using CsvHelper;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -28,11 +31,24 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("./User_Data.csv");
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.AddRange(dataToBeSeed);
+                _applicationDbContext.Database.OpenConnection();
+                try
+                {
+                    _applicationDbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users ON");
+                    _applicationDbContext.SaveChanges();
+                    _applicationDbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Users OFF");
+                }
+                finally
+                {
+                    _applicationDbContext.Database.CloseConnection();
+                }
+
+                _applicationDbContext.SaveChanges();
+
+                
             }
         }
 
@@ -40,12 +56,32 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                Delimiter = ",",
+                MissingFieldFound = null
+            }))
+            {
+                records = csv.GetRecords<User>().ToList();
+            }
 
             return records;
+
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
