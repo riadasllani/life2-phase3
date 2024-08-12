@@ -1,5 +1,10 @@
-﻿using MatchingApp.Models.Entities;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
+using System.Formats.Asn1;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -23,16 +28,16 @@ namespace MatchingApp.Data.Seed
             }
             catch (Exception ex)
             {
+
             }
 
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("C:\\Users\\tina-\\Source\\Repos\\life2-phase3\\MatchingApp\\User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
+                _applicationDbContext.SaveChanges();
             }
         }
 
@@ -40,12 +45,38 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("The CSV file was not found.", path);
+            }
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = "~",
+                BadDataFound = null
+            };
+
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+                while (csv.Read())
+                {
+                    var record = new User
+                    {
+                        Id = csv.GetField<int>(0),
+                        Gender = csv.GetField(1),
+                        Age = csv.GetField<int>(2),
+                        Credits = csv.GetField<int>(3),
+                        Active = csv.GetField<bool>(4),
+                     
+                    };
+
+                    records.Add(record);
+                }
+            }
 
             return records;
+            
         }
     }
 }

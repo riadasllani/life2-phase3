@@ -1,4 +1,6 @@
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
+using MatchingApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,15 +10,21 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly IUserService _userService;
+        private readonly IMatchingService _matchingService;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, IUserService userService, IMatchingService matchingService)
         {
             _logger = logger;
+            _userService = userService;
+            _matchingService = matchingService;
         }
 
         [HttpGet("GetUsers")]
-        public async Task<IActionResult> GetUsers(Filters filters)
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers(Filters filters)
         {
+            var data = await _matchingService.GetAllAsync(filters);
+            return Ok(data);
             // YOUR CODE HERE
             // be sure to return only active users and apply filters
             // return all users as we have only around 400 users,
@@ -29,6 +37,7 @@ namespace MatchingApp.Controllers
         [HttpPost("Match")]
         public async Task<IActionResult> Match(bool like) // true if it likes, false if it dislikes
         {
+
             // YOUR CODE HERE
             // Add record to the Match table, if the same user has liked the current user then
             // just update the is mutual column and return the message that it is a match
@@ -41,9 +50,7 @@ namespace MatchingApp.Controllers
         [HttpPost("SendMessage")]
         public async Task<IActionResult> SendMessage(int userId)
         {
-            // YOUR CODE HERE
-            // User can send message only to the users with who it is matched
-            // Save message to db
+           // var message = _userService.AddAsync();
 
             return Ok();
         }
