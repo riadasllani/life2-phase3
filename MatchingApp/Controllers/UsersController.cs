@@ -65,7 +65,7 @@ namespace MatchingApp.Controllers
             return Ok($"Oldest user is: {oldUser.Id} with age: {oldUser.Age}, youngest one is: {youngUser.Id} with age: {youngUser.Age}");
         }
 
-        [HttpGet("TotalCredits")]
+        /*[HttpGet("TotalCredits")]
         public async Task<IActionResult> GetTotalcredits()
         {
             var oldUser = await _db.Set<User>().Where(u => u.Active).GroupBy(x => x.Age < 50).Select(g => new
@@ -74,8 +74,8 @@ namespace MatchingApp.Controllers
                 avg = g.Sum(u => u.Credits)
             }).ToListAsync();
 
-            return Ok();
-        }
+            return Ok(oldUser);
+        }*/
 
 
     }
