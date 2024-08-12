@@ -1,4 +1,6 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,10 +10,12 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("GetUsers")]
@@ -22,6 +26,8 @@ namespace MatchingApp.Controllers
             // return all users as we have only around 400 users,
             // but the top 100 first users should contain the users who liked the current user
             // be sure for them not to be in queue (so shuffle them)
+
+
 
             return Ok(); // return the users
         }
@@ -39,13 +45,33 @@ namespace MatchingApp.Controllers
         }
 
         [HttpPost("SendMessage")]
-        public async Task<IActionResult> SendMessage(int userId)
+        public async Task<IActionResult> SendMessage(string senderId, string recieverId, string message)
         {
             // YOUR CODE HERE
             // User can send message only to the users with who it is matched
             // Save message to db
 
-            return Ok();
+
+            var matchExist = _context.Matches.Where(m => m.UserWhoLikedId == senderId && m.UserLikedId == recieverId && m.IsMatch).FirstOrDefault();
+
+            if(matchExist == null)
+            {
+                return BadRequest("You can not send message to this user.");
+            }
+
+
+            var newMessage = new Message
+            {
+                SenderId = senderId,
+                recieverId = recieverId,
+                //DateAdded = DateTime.Now,
+                Content = message
+            };
+
+            _context.Messages.Add(newMessage);
+            await _context.SaveChangesAsync();
+
+            return Ok("Message Sent");
         }
     }
 }
