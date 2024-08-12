@@ -1,4 +1,6 @@
-﻿using MatchingApp.Models.Entities;
+﻿using System.Globalization;
+using CsvHelper;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Data.Seed
@@ -28,11 +30,10 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("C:\\Users\\Admin\\Documents\\GitHub\\life2-phase3\\MatchingApp\\User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
+                _applicationDbContext.SaveChanges();
             }
         }
 
@@ -40,10 +41,32 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            if (File.Exists(path))
+            {
+                using var reader = new StreamReader(path);
+                var csvConfig = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    Delimiter = ","
+                };
+                using var csv = new CsvReader(reader, csvConfig);
+                
+                csv.Read();
+                csv.ReadHeader();
+                
+                while (csv.Read())
+                {
+                    var record = new User()
+                    {
+                        //Id = csv.GetField<int>(0),
+                        Gender = csv.GetField<string>(1),
+                        Age = csv.GetField<int>(2),
+                        Credits = csv.GetField<string>(3),
+                        IsActive = csv.GetField<bool>(4)
+                    };
+
+                    records.Add(record);
+                }
+            }
 
             return records;
         }
