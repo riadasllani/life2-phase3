@@ -66,8 +66,7 @@ namespace MatchingApp.Controllers
                 var averageForBothGenders = await _db.Users.AverageAsync(x => x.Credits);
                 // var groupedData = await _db.Users.GroupBy(x => x.Gender).AverageAsync(x);
                 
-                // return Ok(new{averageForBothGenders, groupedData});
-                return Ok();
+                return Ok(new{averageForBothGenders});
 
             }
             catch (Exception e)
