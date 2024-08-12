@@ -1,5 +1,10 @@
-﻿using MatchingApp.Models.Entities;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.Formats.Asn1;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -10,6 +15,26 @@ namespace MatchingApp.Data.Seed
         public DbInitializer(ApplicationDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
+        }
+
+        public List<User> ReadData(string path)
+        {
+            List<User> records = new();
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ",",
+                HasHeaderRecord = true,
+            };
+
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+               // csv.Context.TypeConverterCache.AddConverter<DateTime>(new DateTimeConverter());
+                var csvRecords = csv.GetRecords<User>().ToList();
+                records = csvRecords.ToList();
+            }
+
+            return records;
         }
 
         public void Initialize()
@@ -23,29 +48,19 @@ namespace MatchingApp.Data.Seed
             }
             catch (Exception ex)
             {
+                
             }
 
-            var dataExisting = _applicationDbContext.Users.Any();
-            if (!dataExisting)
+           
+
+            var dataExisting = _applicationDbContext.Users.AnyAsync();
+            if (!dataExisting.Result)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("User_Data.csv");
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.Users.AddRangeAsync(dataToBeSeed);
+                _applicationDbContext.SaveChangesAsync().Wait();
             }
-        }
-
-        public List<User> ReadData(string path)
-        {
-            List<User> records = new();
-
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
-
-            return records;
         }
     }
 }

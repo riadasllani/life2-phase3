@@ -1,3 +1,4 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,23 +9,31 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext applicationDbContext;
 
         public MatchingController(ILogger<MatchingController> logger)
         {
             _logger = logger;
         }
 
-        [HttpGet("GetUsers")]
-        public async Task<IActionResult> GetUsers(Filters filters)
-        {
-            // YOUR CODE HERE
-            // be sure to return only active users and apply filters
-            // return all users as we have only around 400 users,
-            // but the top 100 first users should contain the users who liked the current user
-            // be sure for them not to be in queue (so shuffle them)
+        //[HttpGet("GetUsers")]
+        //public  Task<IActionResult> GetUsers(Filters filters)
+        //{
+        //    // YOUR CODE HERE
+        //    // be sure to return only active users and apply filters
+        //    // return all users as we have only around 400 users,
+        //    // but the top 100 first users should contain the users who liked the current user
+        //    // be sure for them not to be in queue (so shuffle them)
 
-            return Ok(); // return the users
-        }
+
+
+        //    var users =  applicationDbContext.Users.Where(u => u.Active);
+           
+
+
+
+        //    //return Ok(); // return the users
+        //}
 
         [HttpPost("Match")]
         public async Task<IActionResult> Match(bool like) // true if it likes, false if it dislikes

@@ -1,5 +1,8 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata;
 
 namespace MatchingApp.Controllers
 {
@@ -8,6 +11,7 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly ApplicationDbContext _context;
 
         public UsersController(ILogger<UsersController> logger)
         {
@@ -15,6 +19,77 @@ namespace MatchingApp.Controllers
         }
 
 
+        [HttpGet("GetUsers")]
+        public Task<IActionResult> GetTopFive(Filters filters)
+        {
+            // YOUR CODE HERE
+            // be sure to return only active users and apply filters
+            // return all users as we have only around 400 users,
+            // but the top 100 first users should contain the users who liked the current user
+            // be sure for them not to be in queue (so shuffle them)
+
+
+
+            return (Task<IActionResult>)_context.Users.Where(nd => nd.Active)
+                .GroupBy(nd => nd.Credits)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .Take(5);
+
+
+
+
+            // return the users
+        }
+
+        [HttpGet("Get")]
+        public Task<IActionResult> GetAverageCredits(Filters filters)
+        {
+            // YOUR CODE HERE
+            // be sure to return only active users and apply filters
+            // return all users as we have only around 400 users,
+            // but the top 100 first users should contain the users who liked the current user
+            // be sure for them not to be in queue (so shuffle them)
+
+
+
+            return (Task<IActionResult>)_context.Users.GroupBy(g => g.Gender);
+                //.Average(g => g.Credits);
+
+
+
+
+
+            // return the users
+        }
+
+        //[HttpGet("Get")]
+        //public Task<IActionResult> GetOldest(Filters filters)
+        //{
+        //    // YOUR CODE HERE
+        //    // be sure to return only active users and apply filters
+        //    // return all users as we have only around 400 users,
+        //    // but the top 100 first users should contain the users who liked the current user
+        //    // be sure for them not to be in queue (so shuffle them)
+
+
+
+        //    return (Task<IActionResult>)_context.Users.Select(g => g.Key).OrderByDescending(g => )
+        //        //.Average(g => g.Credits);
+
+        //         return await _context.NetflixData
+        //        .Where(nd => nd.type == "Movie")
+        //        .GroupBy(nd => nd.date_added.Value.Month)
+        //        .OrderByDescending(g => g.Count())
+        //        .Select(g => g.Key)
+        //        .FirstOrDefaultAsync();
+
+
+
+
+
+        //    // return the users
+        //}
         // YOUR CODE HERE
         // Here you will have to create 4 endpoints based on these requirements
         /*
