@@ -1,5 +1,8 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Controllers
 {
@@ -9,11 +12,84 @@ namespace MatchingApp.Controllers
     {
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(ILogger<UsersController> logger)
+        private readonly ApplicationDbContext _context;
+        public UsersController(ILogger<UsersController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
+
+        [HttpGet]
+
+        public async Task<IActionResult> UsersWithHighestCredits()
+        {
+            var highestCredits = await _context.Users.Select(u => new GetUsersDto
+            {
+                Id = u.Id,
+                Credits = u.Credits,
+                IsActive = u.IsActive
+            }).Where(u => u.IsActive == 1)
+            .OrderByDescending(u => u.Credits)
+            .Take(5)
+            .ToListAsync();
+            
+            return Ok(highestCredits);
+        }
+
+        [HttpGet("gender")]
+
+        public async Task<IActionResult> AverageCreditsbyGender()
+        {
+            var highestCredits = await _context.Users.Select(u => new GetUsersDto
+            {
+                Id = u.Id,
+                Credits = u.Credits,
+                IsActive = u.IsActive,
+                Gender = u.Gender
+            })
+            .GroupBy(u => u.Gender)
+            .Select(g => new AverageDto { Gender = g.Key, Credits = g.Average(s => s.Credits) })
+            .ToListAsync();
+
+            return Ok(highestCredits);
+        }
+
+        [HttpGet("youngest")]
+
+        public async Task<IActionResult> Youngest()
+        {
+            var youngest = await _context.Users.Select(u => new GetUsersDto
+            {
+                Id = u.Id,
+                Credits = u.Credits,
+                IsActive = u.IsActive,
+                Gender = u.Gender
+            })
+            .Where(u => u.IsActive == 1)
+            .OrderBy(x=>x.Age)
+            .ToListAsync();
+
+            return Ok(youngest);
+        }
+
+        [HttpGet("oldest")]
+
+        public async Task<IActionResult> Oldest()
+        {
+            var oldest = await _context.Users.Select(u => new GetUsersDto
+            {
+                Id = u.Id,
+                Credits = u.Credits,
+                IsActive = u.IsActive,
+                Gender = u.Gender
+            })
+            .OrderByDescending(x => x.Age)
+            .Where(u => u.IsActive == 1)
+            .ToListAsync();
+
+            return Ok(oldest);
+        }
         // YOUR CODE HERE
         // Here you will have to create 4 endpoints based on these requirements
         /*
