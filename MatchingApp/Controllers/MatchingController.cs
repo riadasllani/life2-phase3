@@ -1,5 +1,8 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Controllers
 {
@@ -8,42 +11,70 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext  _context;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger,ApplicationDbContext context )
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers(Filters filters)
         {
-            // YOUR CODE HERE
-            // be sure to return only active users and apply filters
-            // return all users as we have only around 400 users,
-            // but the top 100 first users should contain the users who liked the current user
-            // be sure for them not to be in queue (so shuffle them)
+            var allUsers = await _context.Users.Where(u => u.Active && u.Age >= filters.FromAge && u.Age <= filters.ToAge)
+                .ToListAsync();
+            
+            for(int i = 0; i < allUsers.Count && allUsers.Count < 100; i++)
+            {
+                
+                var likedUsers = _context.Matches.Where(m => m.FirstUserId == allUsers[i].Id && m.IsMutual).ToList();
+                if (likedUsers.Count > 0)
+                {
+                    allUsers[i].Matches = likedUsers;
+                }
+            }
+            
+            allUsers = allUsers.OrderBy(x => Guid.NewGuid()).ToList();
 
-            return Ok(); // return the users
+            return Ok(allUsers);
         }
 
         [HttpPost("Match")]
-        public async Task<IActionResult> Match(bool like) // true if it likes, false if it dislikes
+        public async Task<IActionResult> Match(int user1, int user2, bool like, bool mutal) // true if it likes, false if it dislikes
         {
-            // YOUR CODE HERE
-            // Add record to the Match table, if the same user has liked the current user then
-            // just update the is mutual column and return the message that it is a match
-            // note the same endpoint will be used for dislike too, but if a user dislikes an other user which had already liked
-            // the current one, than that row in the table should be deleted
-
+            
+            if (!like)
+            {
+                var match = _context.Matches.FirstOrDefault(m => m.FirstUserId == user2 && m.SecondUserId == user1);
+                if (match != null)
+                {
+                    _context.Matches.Remove(match);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            
+            _context.Matches.Add(new Match
+            {
+                FirstUserId = user1,
+                SecondUserId = user2,
+                IsMutual = mutal,
+                MatchDate = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPost("SendMessage")]
-        public async Task<IActionResult> SendMessage(int userId)
+        public async Task<IActionResult> SendMessage(int user1, int user2, string message)
         {
-            // YOUR CODE HERE
-            // User can send message only to the users with who it is matched
-            // Save message to db
+            _context.Messages.Add(new Message
+            {
+                SenderId = user1,
+                RecieverId = user2,
+                Content = message,
+                Date = DateTime.Now
+            });
 
             return Ok();
         }

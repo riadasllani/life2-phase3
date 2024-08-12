@@ -28,23 +28,35 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("MatchingApp/User_Data.csv");
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.SaveChanges();
             }
         }
 
         public List<User> ReadData(string path)
         {
             List<User> records = new();
+            using (var reader = new StreamReader(path))
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var values = line.Split(',');
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
-
+                    records.Add(new User
+                        {
+                            Id = Convert.ToInt32(values[0]),
+                            Gender = Convert.ToString(values[1]),
+                            Age = Convert.ToInt32(values[2]),
+                            Credits = Convert.ToInt32(values[3]),
+                            Active = Convert.ToBoolean(values[4])
+                        }
+                    );
+                }
+            }
+            
             return records;
         }
     }
