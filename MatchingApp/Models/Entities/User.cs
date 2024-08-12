@@ -4,5 +4,13 @@
     {
          // YOUR CODE HERE
          // User should have the parameters as in the csv file
+         //Id,Gender,Age,Credits,Active
+         public int Id { get; set; }
+         public string Gender { get; set; }
+         public int Age { get; set; }
+         public int Credits { get; set; }
+         public int Active { get; set; }
+         public int MatchId { get; set; }
+         public Match Match { get; set; }
     }
 }
