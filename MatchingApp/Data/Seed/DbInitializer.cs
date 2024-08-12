@@ -1,4 +1,9 @@
-﻿using MatchingApp.Models.Entities;
+﻿using System.Globalization;
+using System.IO;
+using System.Reflection.PortableExecutable;
+using CsvHelper;
+using CsvHelper.Configuration;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Data.Seed
@@ -23,16 +28,17 @@ namespace MatchingApp.Data.Seed
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
             }
 
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
+                _applicationDbContext.SaveChanges();
             }
         }
 
@@ -40,12 +46,21 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ",", // Use tilde as the delimiter
+                HeaderValidated = null, // Ignore validation of headers
+                MissingFieldFound = null // Ignore missing fields
+            };
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+                csv.Context.RegisterClassMap<UserMap>(); // Register the map
+                records = csv.GetRecords<User>().ToList();
 
-            return records;
+                return records;
+            }
+
         }
     }
 }
