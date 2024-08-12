@@ -1,4 +1,6 @@
+using MatchingApp.Data.UnitOfWork;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,10 +10,12 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         // YOUR CODE HERE
@@ -29,5 +33,47 @@ namespace MatchingApp.Controllers
             4. Total Credits by Age Group:
             Group users into age brackets (0-15, 15-30, 30-45, 45-60, 60-75, 75-90, 90-105). Then, calculate the total Credits for each age group.
          */
+
+        [HttpGet("Top")]
+        public async Task<ActionResult<IEnumerable<User>>> GetTopUser(int size = 5)
+        {
+            var Users = _unitOfWork.Repository<User>().GetAll().Where(x => x.Active == true)
+                        .OrderByDescending(x => x.Credits)
+                        .Take(size)
+                        .ToList();
+            return Ok(Users);
+        }
+
+        [HttpGet("Gender")]
+        public async Task<ActionResult<IEnumerable<User>>> GetGenderUser()
+        {
+            var Users = _unitOfWork.Repository<User>().GetAll().Where(x => x.Active == true)
+                        .OrderByDescending(x => x.Credits)
+                        .Take(1)
+                        .ToList();
+            return Ok(Users);
+        }
+
+        [HttpGet("Youngest")]
+        public async Task<ActionResult<IEnumerable<User>>> GetYoungestUser()
+        {
+            var Users = _unitOfWork.Repository<User>().GetAll()
+                        .OrderByDescending(x => x.Age)
+                        .Take(1)
+                        .ToList();
+            return Ok(Users);
+        }
+
+        [HttpGet("Oldest")]
+        public async Task<ActionResult<IEnumerable<User>>> GetOldestUser()
+        {
+            var Users = _unitOfWork.Repository<User>().GetAll()
+                        .OrderBy(x => x.Age)
+                        .Take(1)
+                        .ToList();
+            return Ok(Users);
+        }
+
+
     }
 }
