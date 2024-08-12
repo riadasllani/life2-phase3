@@ -1,4 +1,4 @@
-using MatchingApp.Models.Dtos;
+using MatchingApp.Services.Users;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,13 +8,47 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
-
-        public UsersController(ILogger<UsersController> logger)
+        private readonly IUserService _userService;
+        
+        public UsersController(ILogger<UsersController> logger, IUserService userService)
         {
             _logger = logger;
+            _userService = userService;
         }
 
-        // YOUR CODE HERE
+
+        [HttpGet("highest-credits")]
+        public async Task<IActionResult> HighestCredits(int count)
+        {
+            var users = await _userService.HighestCredits(count);
+            
+            return Ok(users);
+        }
+        
+        [HttpGet("average-credits")]
+        public async Task<IActionResult> AverageCreditsByGender()
+        {
+            var average  = await _userService.AverageCreditsByGender();
+            
+            return Ok(average);
+        }
+        
+        [HttpGet("youngest-oldest-users")]
+        public async Task<IActionResult> YoungestOldestUsers()
+        {
+            var youngestOldest = await _userService.YoungestOldestUsers();
+            
+            return Ok(youngestOldest);
+        }
+        
+        [HttpGet("total-credits")]
+        public async Task<IActionResult> TotalCreditsByAgeGroup()
+        {
+            var totalByAge = _userService.TotalCreditsByAgeGroup();
+            
+            return Ok(totalByAge);
+        }
+        
         // Here you will have to create 4 endpoints based on these requirements
         /*
             1. Top N Active Users with Highest Credits:

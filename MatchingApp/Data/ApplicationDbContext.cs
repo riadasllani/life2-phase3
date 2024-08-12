@@ -11,11 +11,23 @@ namespace MatchingApp.Data
         }
 
         // YOUR CODE HERE (If needed)
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Match>()
+                .HasKey(x => new { x.LikerId, x.LikedId });
 
+            modelBuilder.Entity<Match>()
+                .HasOne(x => x.Liker)
+                .WithMany(x => x.Matches)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(x => x.Sender)
+                .WithMany(x => x.ReceivedMessages)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            base.OnModelCreating(modelBuilder);
+        }
 
         public DbSet<User> Users {  get; set; } 
         public DbSet<Match> Matches {  get; set; } 
