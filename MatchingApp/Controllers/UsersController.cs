@@ -1,5 +1,7 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Controllers
 {
@@ -8,10 +10,12 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly ApplicationDbContext _dbContext;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, ApplicationDbContext dbContext)
         {
             _logger = logger;
+            _dbContext = dbContext;
         }
 
         // YOUR CODE HERE
@@ -29,5 +33,59 @@ namespace MatchingApp.Controllers
             4. Total Credits by Age Group:
             Group users into age brackets (0-15, 15-30, 30-45, 45-60, 60-75, 75-90, 90-105). Then, calculate the total Credits for each age group.
          */
+
+        [HttpGet("HighestCredit")]
+        public async Task<IActionResult> GetUsersWithHighestCredit(int n)
+        {
+            var users = await _dbContext.Users.Where(x => x.Active).OrderByDescending(x => x.Credits).Take(n).ToListAsync();
+
+
+            return Ok(users);
+        }
+
+        [HttpGet("average-credits-by-gender")]
+        public async Task<IActionResult> GetAverageCreditsByGender()
+        {
+            var users = await _dbContext.Users
+                .GroupBy(x => x.Gender)
+                .Select(g => new
+                {
+                    Gender = g.Key,
+                    Average = g.Average(x => x.Credits)
+                }).ToListAsync();
+
+
+            return Ok(users);
+        }
+
+        [HttpGet("youngest-oldest")]
+        public async Task<IActionResult> GetYoungestAndOldest()
+        {
+            var youngestUser = await _dbContext.Users.Where(x => x.Active).OrderBy(x => x.Age).FirstOrDefaultAsync();
+
+            var oldestUser = await _dbContext.Users.Where(x => x.Active).OrderByDescending(x => x.Age).FirstOrDefaultAsync();
+
+            var response = new OldYoungDto
+            {
+                OldestUser = oldestUser,
+                YoungestUser = youngestUser
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("GroupByAge")]
+        public async Task<IActionResult> GroupByAge()
+        {
+
+            var byAge = await _dbContext.Users.Where(x => x.Active).GroupBy(x => 15 * (x.Age / 15))
+                .Select(s => new
+                {
+                    AgeGroup = $"{s.Key - 15} - {s.Key}",
+                    TotalCreadit = s.Sum(x => x.Credits),
+                }).ToListAsync();
+
+            return Ok(byAge);
+        }
     }
 }

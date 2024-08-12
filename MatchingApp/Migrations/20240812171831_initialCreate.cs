@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MatchingApp.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTablesToDb : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace MatchingApp.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Age = table.Column<int>(type: "int", nullable: false),
                     Credits = table.Column<int>(type: "int", nullable: false),
@@ -33,22 +32,22 @@ namespace MatchingApp.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstUserId = table.Column<int>(type: "int", nullable: true),
-                    SecondUserId = table.Column<int>(type: "int", nullable: true),
+                    UserLikeId = table.Column<long>(type: "bigint", nullable: false),
+                    LikedUserId = table.Column<long>(type: "bigint", nullable: false),
                     IsMutual = table.Column<bool>(type: "bit", nullable: false),
-                    MatchDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Matches", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Matches_Users_FirstUserId",
-                        column: x => x.FirstUserId,
+                        name: "FK_Matches_Users_LikedUserId",
+                        column: x => x.LikedUserId,
                         principalTable: "Users",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Matches_Users_SecondUserId",
-                        column: x => x.SecondUserId,
+                        name: "FK_Matches_Users_UserLikeId",
+                        column: x => x.UserLikeId,
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
@@ -59,17 +58,17 @@ namespace MatchingApp.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SenderId = table.Column<int>(type: "int", nullable: true),
-                    ReceiverId = table.Column<int>(type: "int", nullable: true),
-                    MessageContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MessageDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    SenderId = table.Column<long>(type: "bigint", nullable: false),
+                    RecevierId = table.Column<long>(type: "bigint", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_Users_ReceiverId",
-                        column: x => x.ReceiverId,
+                        name: "FK_Messages_Users_RecevierId",
+                        column: x => x.RecevierId,
                         principalTable: "Users",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -80,19 +79,19 @@ namespace MatchingApp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_FirstUserId",
+                name: "IX_Matches_LikedUserId",
                 table: "Matches",
-                column: "FirstUserId");
+                column: "LikedUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_SecondUserId",
+                name: "IX_Matches_UserLikeId",
                 table: "Matches",
-                column: "SecondUserId");
+                column: "UserLikeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_ReceiverId",
+                name: "IX_Messages_RecevierId",
                 table: "Messages",
-                column: "ReceiverId");
+                column: "RecevierId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_SenderId",

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MatchingApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240811183657_AddTablesToDb")]
-    partial class AddTablesToDb
+    [Migration("20240812171831_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,23 +33,23 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("FirstUserId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsMutual")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("MatchDate")
-                        .HasColumnType("datetime2");
+                    b.Property<long>("LikedUserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int?>("SecondUserId")
-                        .HasColumnType("int");
+                    b.Property<long>("UserLikeId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstUserId");
+                    b.HasIndex("LikedUserId");
 
-                    b.HasIndex("SecondUserId");
+                    b.HasIndex("UserLikeId");
 
                     b.ToTable("Matches");
                 });
@@ -62,22 +62,22 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MessageContent")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("MessageDate")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("ReceiverId")
-                        .HasColumnType("int");
+                    b.Property<long>("RecevierId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int?>("SenderId")
-                        .HasColumnType("int");
+                    b.Property<long>("SenderId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("RecevierId");
 
                     b.HasIndex("SenderId");
 
@@ -86,11 +86,8 @@ namespace MatchingApp.Migrations
 
             modelBuilder.Entity("MatchingApp.Models.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -112,28 +109,36 @@ namespace MatchingApp.Migrations
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Match", b =>
                 {
-                    b.HasOne("MatchingApp.Models.Entities.User", "FirstUser")
+                    b.HasOne("MatchingApp.Models.Entities.User", "LikedUser")
                         .WithMany()
-                        .HasForeignKey("FirstUserId");
+                        .HasForeignKey("LikedUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.HasOne("MatchingApp.Models.Entities.User", "SecondUser")
+                    b.HasOne("MatchingApp.Models.Entities.User", "UserLike")
                         .WithMany()
-                        .HasForeignKey("SecondUserId");
+                        .HasForeignKey("UserLikeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("FirstUser");
+                    b.Navigation("LikedUser");
 
-                    b.Navigation("SecondUser");
+                    b.Navigation("UserLike");
                 });
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Message", b =>
                 {
                     b.HasOne("MatchingApp.Models.Entities.User", "Receiver")
                         .WithMany()
-                        .HasForeignKey("ReceiverId");
+                        .HasForeignKey("RecevierId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("MatchingApp.Models.Entities.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Receiver");
 
