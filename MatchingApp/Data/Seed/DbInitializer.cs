@@ -16,23 +16,26 @@ namespace MatchingApp.Data.Seed
         {
             try
             {
-                if (_applicationDbContext.Database.GetPendingMigrations().Count() > 0)
+                if (_applicationDbContext.Database.GetPendingMigrations().Any())
                 {
                     _applicationDbContext.Database.Migrate();
                 }
             }
             catch (Exception ex)
             {
+                // Handle exception (e.g., logging)
             }
 
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("C:\\Users\\lisma\\OneDrive\\Desktop\\BackEnd\\TEst\\MatchingApp\\User_Data.csv");
 
-                /*
-                 * Your code here ...
-                 */
+                if (dataToBeSeed != null && dataToBeSeed.Count > 0)
+                {
+                    _applicationDbContext.Users.AddRange(dataToBeSeed);
+                    _applicationDbContext.SaveChanges();
+                }
             }
         }
 
@@ -40,12 +43,23 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            var lines = File.ReadAllLines(path);
+            foreach (var line in lines.Skip(1))
+            {
+                var values = line.Split(',');
+                var record = new User
+                {
+                    Id = int.Parse(values[0]),  
+                    Gender = values[1],
+                    Age = int.Parse(values[2]),
+                    Credits = int.Parse(values[3]),
+                    Active = values[4] == "1" 
+                };
+                records.Add(record);
+            }
 
             return records;
         }
+
     }
 }
