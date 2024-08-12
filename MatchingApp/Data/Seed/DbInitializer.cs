@@ -1,5 +1,9 @@
-﻿using MatchingApp.Models.Entities;
+﻿using CsvHelper;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Formats.Asn1;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -28,22 +32,23 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData(@"C:\Users\Buton\Desktop\ProvimLife\life2-phase3\MatchingApp\User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.AddRange(dataToBeSeed);
+
+                _applicationDbContext.SaveChanges();
             }
         }
 
         public List<User> ReadData(string path)
         {
             List<User> records = new();
+            using (var reader = new StreamReader(path))
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                records = csv.GetRecords<User>().ToList();
+            }
 
             return records;
         }
