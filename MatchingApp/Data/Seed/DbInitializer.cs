@@ -28,11 +28,10 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData(@"C:\\Users\\OEM\\Source\\Repos\\life2-phase3\\MatchingApp\\User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
+                _applicationDbContext.SaveChangesAsync();
             }
         }
 
@@ -40,10 +39,20 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            var list = File.ReadAllLines(path);
+            foreach (var line in list)
+            {
+                var parts = line.Split(',');
+
+                records.Add(new User
+                {
+                    Id = int.Parse(parts[0]),
+                    Gender = parts[1],
+                    Age = int.Parse(parts[2]),
+                    Credits = int.Parse(parts[3]),
+                    Active = bool.Parse(parts[4]),
+                });
+            }
 
             return records;
         }

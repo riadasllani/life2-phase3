@@ -1,3 +1,4 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,12 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("GetUsers")]
