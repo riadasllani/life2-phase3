@@ -1,4 +1,6 @@
-﻿using MatchingApp.Models.Entities;
+﻿using System.Globalization;
+using CsvHelper;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Data.Seed
@@ -33,6 +35,7 @@ namespace MatchingApp.Data.Seed
                 /*
                  * Your code here ...
                  */
+				_applicationDbContext.Users.AddRange(dataToBeSeed);
             }
         }
 
@@ -44,6 +47,11 @@ namespace MatchingApp.Data.Seed
              * Your code here ...
              * You MUST use csv helper
              */
+			using (var reader = new StreamReader($"{path}/User_Data.csv"))
+			using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+			{
+				records = csv.GetRecords<User>().ToList();
+			}
 
             return records;
         }
