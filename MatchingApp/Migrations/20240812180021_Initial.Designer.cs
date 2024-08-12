@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MatchingApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240811183657_AddTablesToDb")]
-    partial class AddTablesToDb
+    [Migration("20240812180021_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,23 +33,31 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("FirstUserId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsMutual")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("MatchDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("User1Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("SecondUserId")
-                        .HasColumnType("int");
+                    b.Property<string>("User2Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserWhoLiked")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserWhoWasLiked")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstUserId");
+                    b.HasIndex("User1Id");
 
-                    b.HasIndex("SecondUserId");
+                    b.HasIndex("User2Id");
 
                     b.ToTable("Matches");
                 });
@@ -62,35 +70,40 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("MessageContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("MessageDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Receiver")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ReceiverId")
-                        .HasColumnType("int");
+                    b.Property<string>("Sender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SenderId")
-                        .HasColumnType("int");
+                    b.Property<string>("User1Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User2Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("User1Id");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("User2Id");
 
                     b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MatchingApp.Models.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -112,32 +125,32 @@ namespace MatchingApp.Migrations
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Match", b =>
                 {
-                    b.HasOne("MatchingApp.Models.Entities.User", "FirstUser")
+                    b.HasOne("MatchingApp.Models.Entities.User", "User1")
                         .WithMany()
-                        .HasForeignKey("FirstUserId");
+                        .HasForeignKey("User1Id");
 
-                    b.HasOne("MatchingApp.Models.Entities.User", "SecondUser")
+                    b.HasOne("MatchingApp.Models.Entities.User", "User2")
                         .WithMany()
-                        .HasForeignKey("SecondUserId");
+                        .HasForeignKey("User2Id");
 
-                    b.Navigation("FirstUser");
+                    b.Navigation("User1");
 
-                    b.Navigation("SecondUser");
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Message", b =>
                 {
-                    b.HasOne("MatchingApp.Models.Entities.User", "Receiver")
+                    b.HasOne("MatchingApp.Models.Entities.User", "User1")
                         .WithMany()
-                        .HasForeignKey("ReceiverId");
+                        .HasForeignKey("User1Id");
 
-                    b.HasOne("MatchingApp.Models.Entities.User", "Sender")
+                    b.HasOne("MatchingApp.Models.Entities.User", "User2")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("User2Id");
 
-                    b.Navigation("Receiver");
+                    b.Navigation("User1");
 
-                    b.Navigation("Sender");
+                    b.Navigation("User2");
                 });
 #pragma warning restore 612, 618
         }

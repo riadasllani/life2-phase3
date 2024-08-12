@@ -1,5 +1,8 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchingApp.Controllers
 {
@@ -8,10 +11,12 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _applicationDbContext;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext applicationDbContext)
         {
             _logger = logger;
+            _applicationDbContext = applicationDbContext;
         }
 
         [HttpGet("GetUsers")]
@@ -23,7 +28,11 @@ namespace MatchingApp.Controllers
             // but the top 100 first users should contain the users who liked the current user
             // be sure for them not to be in queue (so shuffle them)
 
-            return Ok(); // return the users
+            var users = _applicationDbContext.Users.Where(e => e.Active);
+
+            
+
+            return Ok(users); // return the users
         }
 
         [HttpPost("Match")]
@@ -34,6 +43,9 @@ namespace MatchingApp.Controllers
             // just update the is mutual column and return the message that it is a match
             // note the same endpoint will be used for dislike too, but if a user dislikes an other user which had already liked
             // the current one, than that row in the table should be deleted
+            var currentUserId = "2"; //get from http context
+
+          
 
             return Ok();
         }
@@ -44,8 +56,25 @@ namespace MatchingApp.Controllers
             // YOUR CODE HERE
             // User can send message only to the users with who it is matched
             // Save message to db
+            var sender = "1";
 
-            return Ok();
+            var isMatched = _applicationDbContext.Matches.Where(e => e.UserWhoLiked == userId.ToString() && e.UserWhoWasLiked == sender && e.IsMutual).Any();
+            if (isMatched)
+            {
+                // get from http context
+                var message = new Message
+                {
+                    Sender = sender,
+                    Receiver = userId.ToString(),
+                    MessageContent = "http",
+                    DateCreated = DateTime.Now
+                };
+
+                _applicationDbContext.Messages.Add(message);
+                _applicationDbContext.SaveChanges();
+                return Ok("Mesage sent");
+            }
+            return BadRequest("Message could not be send");      
         }
     }
 }

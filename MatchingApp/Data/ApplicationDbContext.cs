@@ -10,11 +10,11 @@ namespace MatchingApp.Data
         {
         }
 
-        // YOUR CODE HERE (If needed)
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //}
+       // YOUR CODE HERE(If needed)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
 
 
         public DbSet<User> Users {  get; set; } 

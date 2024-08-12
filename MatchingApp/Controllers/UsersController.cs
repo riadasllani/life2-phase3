@@ -1,4 +1,6 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,10 +10,14 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IUserRepository  _userRepository;
+        private readonly ApplicationDbContext applicationDbContext;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, IUserRepository userRepository, ApplicationDbContext applicationDbContext)
         {
             _logger = logger;
+            _userRepository = userRepository;
+            this.applicationDbContext = applicationDbContext;
         }
 
         // YOUR CODE HERE
@@ -29,5 +35,35 @@ namespace MatchingApp.Controllers
             4. Total Credits by Age Group:
             Group users into age brackets (0-15, 15-30, 30-45, 45-60, 60-75, 75-90, 90-105). Then, calculate the total Credits for each age group.
          */
+
+        public async Task<IEnumerable<User>> GetTopNActiveUsers()
+        {
+            var users = applicationDbContext.Users.Where(u => u.Active == true).OrderByDescending(c => c.Credits).Take(5).ToList();
+            return users;
+        }
+
+        public async Task<IActionResult> GetAverageCredits()
+        {
+            var result = applicationDbContext.Users.GroupBy(s => s.Gender).Select(g => new { Gender = g.Key, Avg = g.Average(s => s.Credits) });
+            return Ok(result);  
+        }
+
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = applicationDbContext.Users.OrderBy(e => e.CreatedAt);
+            var user1 = users.First();
+            var user2 = users.Last();
+            return Ok( (user1, user2));
+        }
+
+        public async Task<IActionResult> GetTotal()
+        {
+            //Needed to convert age to date time
+           //  var users = applicationDbContext.Users.GroupBy(x => x.Age.AddYears(15).Date).Select( g => new {g.Key.AddYears(15), Value = g.Sum(e => e.Credits))
+            return Ok();
+        }
+
+        
+
     }
 }
