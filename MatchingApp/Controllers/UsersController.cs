@@ -1,4 +1,6 @@
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
+using MatchingApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,11 +10,16 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IUserService _userService;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(IUserService userService,ILogger<UsersController> logger)
         {
             _logger = logger;
+            _userService = userService;
         }
+
+        
+
 
         // YOUR CODE HERE
         // Here you will have to create 4 endpoints based on these requirements
