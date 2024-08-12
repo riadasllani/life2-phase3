@@ -1,4 +1,6 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,10 +10,12 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _dbContext;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext dbContext)
         {
             _logger = logger;
+            _dbContext = dbContext;
         }
 
         [HttpGet("GetUsers")]
@@ -22,6 +26,8 @@ namespace MatchingApp.Controllers
             // return all users as we have only around 400 users,
             // but the top 100 first users should contain the users who liked the current user
             // be sure for them not to be in queue (so shuffle them)
+
+            
 
             return Ok(); // return the users
         }
@@ -35,6 +41,7 @@ namespace MatchingApp.Controllers
             // note the same endpoint will be used for dislike too, but if a user dislikes an other user which had already liked
             // the current one, than that row in the table should be deleted
 
+
             return Ok();
         }
 
@@ -44,6 +51,20 @@ namespace MatchingApp.Controllers
             // YOUR CODE HERE
             // User can send message only to the users with who it is matched
             // Save message to db
+            var senderId = 1232;
+            var isMatched = _dbContext.Matches.Where(x => x.UserLikedId == senderId && x.UserGotLikedId == userId).Select(x => x.IsMutual);
+            if (isMatched)
+            {
+                var message = new Message
+                {
+                    RecieverId = userId,
+                    SenderId = senderId,
+                    Content = "Message",
+                    SentTime = DateTime.Now
+                };
+
+                _dbContext.Add(message);
+            }
 
             return Ok();
         }
