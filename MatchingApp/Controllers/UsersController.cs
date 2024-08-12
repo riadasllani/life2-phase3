@@ -1,3 +1,4 @@
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,12 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         // YOUR CODE HERE
@@ -29,5 +32,33 @@ namespace MatchingApp.Controllers
             4. Total Credits by Age Group:
             Group users into age brackets (0-15, 15-30, 30-45, 45-60, 60-75, 75-90, 90-105). Then, calculate the total Credits for each age group.
          */
+
+        [HttpGet("Creds")]
+        public IActionResult GetUsersWithAverageCredits()
+        {
+            var users = _context.Users.Sum(x => x.Credits);
+
+            return Ok(users);
+        }
+        
+        [HttpGet("Creds")]
+        public IActionResult youngestOldest()
+        {
+            var users = _context.Users.OrderByDescending(x => x.Age);
+            
+            
+
+            return Ok(users);
+        }
+        
+        [HttpGet]
+        public IActionResult GetUsersWithHighestCredits(int N)
+        {
+            var usersWithHighestCredits = _context.Users
+                .OrderByDescending(x => x.Credits)
+                .Take(N);
+
+            return Ok(usersWithHighestCredits);
+        }
     }
 }

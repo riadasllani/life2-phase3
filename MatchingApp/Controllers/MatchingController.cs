@@ -1,4 +1,7 @@
+using System.Runtime.InteropServices.JavaScript;
+using MatchingApp.Data;
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,22 +11,35 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("GetUsers")]
-        public async Task<IActionResult> GetUsers(Filters filters)
+        public async Task<IActionResult> GetUsers([FromBody]Filters filters)
         {
             // YOUR CODE HERE
             // be sure to return only active users and apply filters
             // return all users as we have only around 400 users,
             // but the top 100 first users should contain the users who liked the current user
             // be sure for them not to be in queue (so shuffle them)
+            var activeUsers = _context.Users
+                .Where(x => x.Age >= filters.FromAge && x.Age <= filters.ToAge)
+                .Where(x => x.Active == true)
+                .ToList();
 
-            return Ok(); // return the users
+            if (activeUsers == null)
+            {
+                return NotFound();
+            }
+            
+            
+            
+            return Ok(activeUsers); // return the users
         }
 
         [HttpPost("Match")]
@@ -35,17 +51,32 @@ namespace MatchingApp.Controllers
             // note the same endpoint will be used for dislike too, but if a user dislikes an other user which had already liked
             // the current one, than that row in the table should be deleted
 
+            
+            
             return Ok();
         }
 
         [HttpPost("SendMessage")]
-        public async Task<IActionResult> SendMessage(int userId)
+        public async Task<IActionResult> SendMessage(int FirstUser, int SecondUser, string message)
         {
             // YOUR CODE HERE
             // User can send message only to the users with who it is matched
             // Save message to db
 
-            return Ok();
+            var users = _context.Matches
+                .Where(x => x.IsMutual)
+                .Select(x => x.FirstUserId == FirstUser && x.SecondUserId == SecondUser);
+
+            var sendmessage = _context.Messages.Select(x => new Message
+            {
+                Id = new Int32(),
+                SenderId = FirstUser,
+                RecieverId = SecondUser,
+                MessageContent = message,
+                MessageDate = DateTime.UtcNow
+            });
+
+            return Ok(sendmessage);
         }
     }
 }

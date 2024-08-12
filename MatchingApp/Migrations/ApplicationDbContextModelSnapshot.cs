@@ -24,13 +24,13 @@ namespace MatchingApp.Migrations
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Match", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MatchId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MatchId"));
 
-                    b.Property<int?>("FirstUserId")
+                    b.Property<int>("FirstUserId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsMutual")
@@ -39,10 +39,10 @@ namespace MatchingApp.Migrations
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("SecondUserId")
+                    b.Property<int>("SecondUserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("MatchId");
 
                     b.HasIndex("FirstUserId");
 
@@ -66,10 +66,16 @@ namespace MatchingApp.Migrations
                     b.Property<DateTime>("MessageDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("ReceiverId")
+                    b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SenderId")
+                    b.Property<int>("RecieverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -77,6 +83,8 @@ namespace MatchingApp.Migrations
                     b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -102,7 +110,12 @@ namespace MatchingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("MessageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
 
                     b.ToTable("Users");
                 });
@@ -111,11 +124,15 @@ namespace MatchingApp.Migrations
                 {
                     b.HasOne("MatchingApp.Models.Entities.User", "FirstUser")
                         .WithMany()
-                        .HasForeignKey("FirstUserId");
+                        .HasForeignKey("FirstUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MatchingApp.Models.Entities.User", "SecondUser")
                         .WithMany()
-                        .HasForeignKey("SecondUserId");
+                        .HasForeignKey("SecondUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FirstUser");
 
@@ -124,17 +141,32 @@ namespace MatchingApp.Migrations
 
             modelBuilder.Entity("MatchingApp.Models.Entities.Message", b =>
                 {
-                    b.HasOne("MatchingApp.Models.Entities.User", "Receiver")
+                    b.HasOne("MatchingApp.Models.Entities.User", "Reciever")
                         .WithMany()
-                        .HasForeignKey("ReceiverId");
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MatchingApp.Models.Entities.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Receiver");
+                    b.HasOne("MatchingApp.Models.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Reciever");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("MatchingApp.Models.Entities.User", b =>
+                {
+                    b.HasOne("MatchingApp.Models.Entities.Message", null)
+                        .WithMany()
+                        .HasForeignKey("MessageId");
                 });
 #pragma warning restore 612, 618
         }

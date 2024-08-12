@@ -9,12 +9,17 @@ namespace MatchingApp.Data
         : base(options)
         {
         }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-        // YOUR CODE HERE (If needed)
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //}
+            modelBuilder.Entity<User>()
+                .HasMany<Message>();
+
+            modelBuilder.Entity<Message>()
+                .HasMany<User>();
+        }
 
 
         public DbSet<User> Users {  get; set; } 
