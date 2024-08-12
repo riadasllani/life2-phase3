@@ -1,5 +1,6 @@
 using MatchingApp.Data;
 using MatchingApp.Data.Seed;
+using MatchingApp.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDbInitializer,DbInitializer>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IMatchingService, MatchingService>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

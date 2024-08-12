@@ -1,5 +1,8 @@
 ﻿using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -28,11 +31,10 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("C:\\Users\\Valzon\\Source\\Repos\\life2-phase3\\MatchingApp\\User_Data.csv"); //Send the right path for ApplicationData.csv within Data folder 
 
-                /*
-                 * Your code here ...
-                 */
+                _applicationDbContext.Users.AddRange(dataToBeSeed);
+                _applicationDbContext.SaveChanges();
             }
         }
 
@@ -40,10 +42,34 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("The CSV file was not found.", path);
+            }
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ",",
+                BadDataFound = null
+            };
+
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+                while (csv.Read())
+                {
+                    var record = new User
+                    {
+                        Id = csv.GetField(0),
+                        Gender = csv.GetField(1),
+                        Age = csv.GetField(2),
+                        Credits = csv.GetField(3),
+                        Active = csv.GetField(4),
+                    };
+
+                    records.Add(record);
+                }
+            }
 
             return records;
         }
