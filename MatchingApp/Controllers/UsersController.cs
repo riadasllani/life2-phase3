@@ -1,4 +1,6 @@
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
+using MatchingApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchingApp.Controllers
@@ -8,26 +10,82 @@ namespace MatchingApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IUserService _userService;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, IUserService userService)
         {
             _logger = logger;
+            _userService = userService;
         }
 
-        // YOUR CODE HERE
-        // Here you will have to create 4 endpoints based on these requirements
-        /*
-            1. Top N Active Users with Highest Credits:
-            You should find the top N users (e.g., N = 5) with the highest Credits who are also Active. You should sort the data by Credits in descending order using LINQ.
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _userService.GetAllAsync();
+            return Ok(result);
+        }
 
-            2. Average Credits by Gender:
-            You should calculate the average Credits first for both male and female users, then group the data by gender and compute the average.
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var result = await _userService.GetByIdAsync(id);
+            if (result == null)
+                return NotFound();
 
-            3. Youngest and Oldest Active Users:
-            Identify the youngest and oldest Active users.
+            return Ok(result);
+        }
 
-            4. Total Credits by Age Group:
-            Group users into age brackets (0-15, 15-30, 30-45, 45-60, 60-75, 75-90, 90-105). Then, calculate the total Credits for each age group.
-         */
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _userService.AddAsync(user);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] User user)
+        {
+            if (id != user.Id)
+                return BadRequest("ID mismatch");
+
+            await _userService.UpdateAsync(user);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var existing = await _userService.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            await _userService.DeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet]
+        public async Task TopNActiveUsers()
+        {
+
+        }
+        [HttpGet]
+        public async Task AverageCreditsByGenderAsync()
+        {
+
+        }
+        [HttpGet]
+        public async Task YoungestOldestActiveUsersAsync()
+        {
+
+        }
+        [HttpGet]
+        public async Task TotalCreditsByAgeGroup()
+        {
+
+        }
     }
 }
+

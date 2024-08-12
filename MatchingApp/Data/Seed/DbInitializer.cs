@@ -1,5 +1,8 @@
-﻿using MatchingApp.Models.Entities;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MatchingApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace MatchingApp.Data.Seed
 {
@@ -28,7 +31,7 @@ namespace MatchingApp.Data.Seed
             var dataExisting = _applicationDbContext.Users.Any();
             if (!dataExisting)
             {
-                var dataToBeSeed = ReadData(""); //Send the right path for ApplicationData.csv within Data folder 
+                var dataToBeSeed = ReadData("C:\\Users\\temal\\Source\\Repos\\life2-phase3\\MatchingApp\\User_Data.csv"); 
 
                 /*
                  * Your code here ...
@@ -40,10 +43,31 @@ namespace MatchingApp.Data.Seed
         {
             List<User> records = new();
 
-            /*
-             * Your code here ...
-             * You MUST use csv helper
-             */
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("The CSV file was not found.", path);
+            }
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = "~",
+                BadDataFound = null
+            };
+
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, config))
+            {
+                while (csv.Read())
+                {
+                    var record = new User
+                    {
+                        Id = csv.GetField(0),
+                        Gender = csv.GetField(1),
+                    };
+
+                    records.Add(record);
+                }
+            }
 
             return records;
         }

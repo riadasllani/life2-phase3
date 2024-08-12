@@ -1,5 +1,8 @@
 using MatchingApp.Models.Dtos;
+using MatchingApp.Models.Entities;
+using MatchingApp.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace MatchingApp.Controllers
 {
@@ -8,42 +11,74 @@ namespace MatchingApp.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ILogger<MatchingController> _logger;
+        private readonly IMatchingService _matchingService;
 
-        public MatchingController(ILogger<MatchingController> logger)
+        public MatchingController(ILogger<MatchingController> logger, IMatchingService matchingService)
         {
             _logger = logger;
+            _matchingService = matchingService;
         }
 
         [HttpGet("GetUsers")]
-        public async Task<IActionResult> GetUsers(Filters filters)
+        public async Task<IActionResult> GetAllUsersAsync()
         {
-            // YOUR CODE HERE
-            // be sure to return only active users and apply filters
-            // return all users as we have only around 400 users,
-            // but the top 100 first users should contain the users who liked the current user
-            // be sure for them not to be in queue (so shuffle them)
+            var result = await _matchingService.GetAllUsersAsync();
+            return Ok(result); 
+        }
 
-            return Ok(); // return the users
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var result = await _matchingService.GetByIdAsync(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Models.Entities.Match match)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _matchingService.AddAsync(match);
+            return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] Models.Entities.Match match)
+        {
+            if (id != match.Id)
+                return BadRequest("ID mismatch");
+
+            await _matchingService.UpdateAsync(match);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var existing = await _matchingService.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            await _matchingService.DeleteAsync(id);
+            return NoContent();
         }
 
         [HttpPost("Match")]
-        public async Task<IActionResult> Match(bool like) // true if it likes, false if it dislikes
+        public async Task<IActionResult> Match(bool like, [FromBody] Models.Entities.Match match) // true if it likes, false if it dislikes
         {
-            // YOUR CODE HERE
-            // Add record to the Match table, if the same user has liked the current user then
-            // just update the is mutual column and return the message that it is a match
-            // note the same endpoint will be used for dislike too, but if a user dislikes an other user which had already liked
-            // the current one, than that row in the table should be deleted
+            await _matchingService.AddAsync(match);
 
             return Ok();
         }
 
         [HttpPost("SendMessage")]
-        public async Task<IActionResult> SendMessage(int userId)
+        public async Task<IActionResult> SendMessage(int userId, Models.Entities.Match match)
         {
-            // YOUR CODE HERE
-            // User can send message only to the users with who it is matched
-            // Save message to db
+            await _matchingService.AddAsync(match);
 
             return Ok();
         }
