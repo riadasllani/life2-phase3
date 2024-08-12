@@ -30,23 +30,10 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("FirstUserId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsMutual")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("MatchDate")
+                    b.Property<DateTime>("DateLiked")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("SecondUserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("FirstUserId");
-
-                    b.HasIndex("SecondUserId");
 
                     b.ToTable("Matches");
                 });
@@ -59,24 +46,14 @@ namespace MatchingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MessageContent")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("MessageDate")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("ReceiverId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SenderId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
                 });
@@ -95,8 +72,8 @@ namespace MatchingApp.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<int>("Credits")
-                        .HasColumnType("int");
+                    b.Property<long>("Credits")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Gender")
                         .IsRequired()
@@ -105,36 +82,6 @@ namespace MatchingApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("MatchingApp.Models.Entities.Match", b =>
-                {
-                    b.HasOne("MatchingApp.Models.Entities.User", "FirstUser")
-                        .WithMany()
-                        .HasForeignKey("FirstUserId");
-
-                    b.HasOne("MatchingApp.Models.Entities.User", "SecondUser")
-                        .WithMany()
-                        .HasForeignKey("SecondUserId");
-
-                    b.Navigation("FirstUser");
-
-                    b.Navigation("SecondUser");
-                });
-
-            modelBuilder.Entity("MatchingApp.Models.Entities.Message", b =>
-                {
-                    b.HasOne("MatchingApp.Models.Entities.User", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverId");
-
-                    b.HasOne("MatchingApp.Models.Entities.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId");
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
                 });
 #pragma warning restore 612, 618
         }
